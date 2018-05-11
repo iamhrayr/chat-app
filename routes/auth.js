@@ -9,51 +9,49 @@ const router = express.Router();
 const User = mongoose.model('User');
 
 router.post('/register', (req, res) => {
-    const username = req.body.username;
+    const email = req.body.email;
     const password = req.body.password;
 
-    User.findOne({username})
+    User.findOne({ email })
         .then(user => {
             if (user) {
                 res.status(422).send({
-                    message: 'The username already exists'
+                    message: 'The email already registered'
                 });
                 return;
             } else {
-                new User({
-                    username,
-                    password
-                }).save().then(newUser => {
+                new User({ email, password }).save().then(newUser => {
                     res.send({
                         message: 'User created successfully'
-                    })
-                })
+                    });
+                });
             }
         })
         .catch(err => {
             console.log('err', err);
-        })
-
+        });
 });
 
 router.post('/login', (req, res) => {
-    const {username, password} = req.body;
-    
-    User.findOne({username}).then(user => {
+    const { email, password } = req.body;
+
+    User.findOne({ email }).then(user => {
         if (user) {
             user.comparePassword(password, (err, isMatch) => {
                 if (err) throw err;
                 if (isMatch) {
-                    const token = jwt.sign(user, secret);
-                    return res.send({user, token});
+                    const payload = Object.assign({}, user.toObject());
+                    delete payload.password;
+                    const token = jwt.sign(payload, secret);
+                    return res.send({ payload, token });
                 } else {
                     return res.status(422).send({
-                        message: 'Wrong username or password'
-                    })
+                        message: 'Wrong email or password'
+                    });
                 }
             });
         }
-    })
-})
+    });
+});
 
 module.exports = router;

@@ -3,20 +3,23 @@ const bcrypt = require('bcrypt');
 const SALT_WORK_FACTOR = 10;
 const Schema = mongoose.Schema;
 
-const userSchema = new Schema({
-    login: {
-        type: String,
-        require: true,
-        lowercase: true, 
-        trim: true
+const userSchema = new Schema(
+    {
+        email: {
+            type: String,
+            require: true,
+            lowercase: true,
+            trim: true
+        },
+        password: {
+            type: String,
+            require: true
+        },
+        firstName: String,
+        lastName: String
     },
-    password: {
-        type: String,
-        require: true
-    },
-    firstName: String,
-    lastName: String
-}, { timestamps: true });
+    { timestamps: true }
+);
 
 userSchema.pre('save', function(next) {
     var user = this;
@@ -45,6 +48,5 @@ userSchema.methods.comparePassword = function(candidatePassword, cb) {
         cb(null, isMatch);
     });
 };
-
 
 mongoose.model('User', userSchema);
