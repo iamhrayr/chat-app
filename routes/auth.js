@@ -35,23 +35,34 @@ router.post('/register', (req, res) => {
 router.post('/login', (req, res) => {
     const { email, password } = req.body;
 
-    User.findOne({ email }).then(user => {
-        if (user) {
-            user.comparePassword(password, (err, isMatch) => {
-                if (err) throw err;
-                if (isMatch) {
-                    const payload = Object.assign({}, user.toObject());
-                    delete payload.password;
-                    const token = jwt.sign(payload, secret);
-                    return res.send({ payload, token });
-                } else {
-                    return res.status(422).send({
-                        message: 'Wrong email or password'
-                    });
-                }
-            });
-        }
-    });
+    User.findOne({ email })
+        .then(user => {
+            if (user) {
+                user.comparePassword(password, (err, isMatch) => {
+                    if (err) throw err;
+                    if (isMatch) {
+                        const payload = Object.assign({}, user.toObject());
+                        delete payload.password;
+                        delete payload.__v;
+                        delete payload.createdAt;
+                        delete payload.updatedAt;
+                        const token = jwt.sign(payload, secret);
+                        return res.send({ user: payload, token });
+                    } else {
+                        return res.status(422).send({
+                            message: 'Wrong email or password'
+                        });
+                    }
+                });
+            } else {
+                return res.status(422).send({
+                    message: 'Wrong email or password'
+                });
+            }
+        })
+        .catch(err => {
+            console.log(err);
+        });
 });
 
 module.exports = router;

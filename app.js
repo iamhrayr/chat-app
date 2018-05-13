@@ -22,7 +22,7 @@ require('./config/passport')(passport);
 
 // load routes
 const authRoutes = require('./routes/auth');
-const messageRoutes = require('./routes/messages');
+const chatRoutes = require('./routes/messages');
 
 // use middlewares
 app.use(morgan('tiny'));
@@ -31,7 +31,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // init routes
 app.use('/api/auth', authRoutes);
-app.use('/api', messageRoutes);
+app.use('/api/chat', chatRoutes);
 
 // hire server and listen to the port
 const PORT = process.env.PORT || 3001;
