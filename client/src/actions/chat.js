@@ -17,7 +17,7 @@ export function fetchConversations() {
                 dispatch(success(res.data));
             })
             .catch(err => {
-                dispatch(success(err.response.data));
+                dispatch(failure(err.response.data));
             });
     };
 
@@ -46,7 +46,7 @@ export function fetchConversation(id) {
         dispatch(request());
 
         axios
-            .get(`api/chat/conversation/${id}`)
+            .get(`/api/chat/conversation/${id}`)
             .then(res => {
                 dispatch(success(res.data));
             })

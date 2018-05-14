@@ -12,7 +12,7 @@ class App extends Component {
         return (
             <Router history={history}>
                 <Container>
-                    <Route path="/" component={ConversationsPage} />
+                    <Route path="/" exact component={ConversationsPage} />
                     <Route path="/chat/:id" component={ConversationPage} />
                     <Route path="/login" component={LoginPage} />
                     <Route path="/register" component={RegisterPage} />
