@@ -8,7 +8,7 @@ const initialState = {
     user: user ? JSON.parse(user) : null
 };
 
-export default function(state = defaultStatus, action) {
+export default function(state = initialState, action) {
     switch (action.type) {
         case LOGIN_SUCCESS:
             return {
@@ -16,6 +16,8 @@ export default function(state = defaultStatus, action) {
                 user: action.payload.user
             };
         case LOGIN_FAILURE:
+            return state;
+        default:
             return state;
     }
 }
