@@ -1,16 +1,20 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Container, TextArea } from 'semantic-ui-react';
-import { fetchConversation } from '../../../actions/chat';
+import { Container, TextArea, Form, Button } from 'semantic-ui-react';
+import { fetchConversation, sendMessage } from '../../../actions/chat';
 
 class Conversation extends Component {
+    state = {
+        message: ''
+    };
+
     componentDidMount() {
         const { id } = this.props.match.params;
         this.props.fetchConversation(id);
     }
+
     renderMessages = () => {
         return this.props.conversation.data.map(msg => {
-            console.log(msg);
             return (
                 <div key={msg._id} style={{ marginBottom: 15 }}>
                     <strong>{msg.author.firstName + ' ' + msg.author.lastName}</strong>
@@ -19,11 +23,25 @@ class Conversation extends Component {
             );
         });
     };
+
+    handleSendMessage = () => {
+        this.props.sendMessage(this.state.message, this.props.match.params.id);
+    };
+
+    handleChangeMessage = (e, { name, value }) => {
+        this.setState({
+            [name]: value
+        });
+    };
+
     render() {
         if (this.props.conversation.isFetched) {
             return (
-                <Container text>
-                    <TextArea />
+                <Container text style={{ marginTop: 10 }}>
+                    <Form onSubmit={this.handleSendMessage} style={{ marginBottom: 30 }}>
+                        <TextArea name="message" onChange={this.handleChangeMessage} value={this.state.message} />
+                        <Button style={{ marginTop: 5 }}>Send</Button>
+                    </Form>
                     {this.renderMessages()}
                 </Container>
             );
@@ -43,4 +61,4 @@ function mapStateToProps(state) {
         conversation: state.conversation
     };
 }
-export default connect(mapStateToProps, { fetchConversation })(Conversation);
+export default connect(mapStateToProps, { fetchConversation, sendMessage })(Conversation);

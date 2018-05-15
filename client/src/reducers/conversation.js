@@ -1,7 +1,8 @@
 import {
     FETCH_CONVERSATION_REQUEST,
     FETCH_CONVERSATION_SUCCESS,
-    FETCH_CONVERSATION_FAILURE
+    FETCH_CONVERSATION_FAILURE,
+    SEND_MESSAGE_SUCCESS
 } from '../actions/actionTypes';
 
 const initialState = {
@@ -29,6 +30,11 @@ export default function chat(state = initialState, action) {
                 isFetched: false,
                 data: []
             };
+        // case SEND_MESSAGE_SUCCESS:
+        //     return {
+        //         ...state,
+        //         data: [...state.data, action.msg]
+        //     };
         default:
             return state;
     }

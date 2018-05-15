@@ -4,7 +4,10 @@ import {
     FETCH_CONVERSATIONS_FAILURE,
     FETCH_CONVERSATION_REQUEST,
     FETCH_CONVERSATION_SUCCESS,
-    FETCH_CONVERSATION_FAILURE
+    FETCH_CONVERSATION_FAILURE,
+    SEND_MESSAGE_REQUEST,
+    SEND_MESSAGE_SUCCESS,
+    SEND_MESSAGE_FAILURE
 } from './actionTypes';
 import axios from 'axios';
 
@@ -69,6 +72,38 @@ export function fetchConversation(id) {
     function failure(err) {
         return {
             type: FETCH_CONVERSATION_FAILURE,
+            payload: err
+        };
+    }
+}
+
+export function sendMessage(msg, convId) {
+    return dispatch => {
+        dispatch(request());
+        axios
+            .post(`/api/chat/conversation/${convId}`, { messageBody: msg })
+            .then(res => {
+                dispatch(success(res.data));
+            })
+            .catch(err => {
+                failure(err.response.data);
+            });
+    };
+
+    function request() {
+        return {
+            type: SEND_MESSAGE_REQUEST
+        };
+    }
+    function success(res) {
+        return {
+            type: SEND_MESSAGE_SUCCESS,
+            payload: res
+        };
+    }
+    function failure(err) {
+        return {
+            type: SEND_MESSAGE_FAILURE,
             payload: err
         };
     }

@@ -4,6 +4,7 @@ const passport = require('passport');
 const router = express.Router();
 const requireAuth = require('../helpers/requireAuth');
 
+const User = mongoose.model('User');
 const Message = mongoose.model('Message');
 const Conversation = mongoose.model('Conversation');
 
@@ -18,12 +19,15 @@ router.post('/conversation', requireAuth, (req, res) => {
             });
         } else {
             Conversation.findOne({
-                    $and: [{
+                $and: [
+                    {
                         participants: req.user._id
-                    }, {
+                    },
+                    {
                         participants: user._id
-                    }]
-                })
+                    }
+                ]
+            })
                 .then(conversation => {
                     if (conversation) {
                         return res.status(422).send({
@@ -31,8 +35,8 @@ router.post('/conversation', requireAuth, (req, res) => {
                         });
                     } else {
                         new Conversation({
-                                participants: [req.user._id, user._id]
-                            })
+                            participants: [req.user._id, user._id]
+                        })
                             .save()
                             .then(conversation => {
                                 return res.send({
@@ -51,14 +55,14 @@ router.post('/conversation', requireAuth, (req, res) => {
 // get a conversation list of a authorized user with the last message of each conversation
 router.get('/conversations', requireAuth, (req, res) => {
     Conversation.find({
-            participants: req.user._id
-        })
+        participants: req.user._id
+    })
         .then(conversations => {
             let fullConversations = [];
             conversations.forEach(conversation => {
                 Message.find({
-                        conversation: conversation._id
-                    })
+                    conversation: conversation._id
+                })
                     .select('-_id')
                     .sort('-createdAt')
                     .limit('-1')
@@ -95,10 +99,11 @@ router.post('/conversation/:id', requireAuth, (req, res) => {
     }).then(conversation => {
         if (conversation.participants.indexOf(req.user._id) >= 0) {
             new Message({
-                    conversation: req.params.id,
-                    author: req.user._id,
-                    body: messageBody
-                })
+                conversation: req.params.id,
+                author: req.user._id,
+                body: req.body.messageBody
+            })
+                .save()
                 .then(messages => {
                     res.send({
                         message: 'message sent successfully'
@@ -124,8 +129,8 @@ router.get('/conversation/:id', requireAuth, (req, res) => {
     }).then(conversation => {
         if (conversation.participants.indexOf(req.user._id) >= 0) {
             Message.find({
-                    conversation: req.params.id
-                })
+                conversation: req.params.id
+            })
                 .sort('-createdAt')
                 .populate({
                     path: 'author',
