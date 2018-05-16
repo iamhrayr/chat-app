@@ -57,6 +57,10 @@ router.get('/conversations', requireAuth, (req, res) => {
     Conversation.find({
         participants: req.user._id
     })
+        .populate({
+            path: 'participants',
+            select: 'firstName lastName email'
+        })
         .then(conversations => {
             let fullConversations = [];
             conversations.forEach(conversation => {
@@ -68,11 +72,18 @@ router.get('/conversations', requireAuth, (req, res) => {
                     .limit('-1')
                     .populate({
                         path: 'author',
-                        select: 'firstName lastName -_id '
+                        select: 'firstName lastName -_id'
                     })
                     .then(messages => {
                         // messages is array because we are using "find" instead of "findOne"
-                        fullConversations.push(messages[0]);
+                        let oponent = conversation.participants.filter(participant => {
+                            return participant.email !== req.user.email;
+                        })[0];
+                        let lastMsg = {
+                            ...messages[0]._doc,
+                            oponent
+                        };
+                        fullConversations.push(lastMsg);
                         if (fullConversations.length === conversations.length) {
                             return res.send(fullConversations);
                         }

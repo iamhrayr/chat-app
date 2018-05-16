@@ -11,12 +11,13 @@ class Conversations extends Component {
 
     renderConversations = () => {
         return this.props.conversations.data.map(conv => {
+            console.log(conv);
             return (
                 <List.Item key={conv.conversation}>
                     <Image avatar src="https://bootdey.com/img/Content/avatar/avatar4.png" />
                     <List.Content>
-                        <List.Header as={Link} to={`/chat/${conv.conversation}`}>{`${conv.author.firstName} ${
-                            conv.author.lastName
+                        <List.Header as={Link} to={`/chat/${conv.conversation}`}>{`${conv.oponent.firstName} ${
+                            conv.oponent.lastName
                         }`}</List.Header>
                         <List.Description>{conv.body}</List.Description>
                     </List.Content>
