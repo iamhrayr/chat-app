@@ -6,11 +6,17 @@ const bodyParser = require('body-parser');
 const config = require('./config');
 const passport = require('passport');
 const app = express();
+const server = http.createServer(app);
+const io = require('socket.io')(server);
+const socketioJwt = require('socketio-jwt');
 
 // connect to the mongoDB
-mongoose.connect(config.mongoURI, () => {
-    console.log('connected to mongoDB');
-});
+mongoose.connect(
+    config.mongoURI,
+    () => {
+        console.log('connected to mongoDB');
+    }
+);
 
 // load models
 require('./models/User');
@@ -27,7 +33,11 @@ const chatRoutes = require('./routes/messages');
 // use middlewares
 app.use(morgan('tiny'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(
+    bodyParser.urlencoded({
+        extended: false
+    })
+);
 
 // init routes
 app.use('/api/auth', authRoutes);
@@ -35,6 +45,38 @@ app.use('/api/chat', chatRoutes);
 
 // hire server and listen to the port
 const PORT = process.env.PORT || 3001;
-http.createServer(app).listen(PORT, () => {
+server.listen(PORT, () => {
     console.log('listening on port:', PORT);
+});
+
+// socket connections
+const sockets = {};
+io.use(
+    socketioJwt.authorize({
+        secret: config.secret,
+        handshake: true
+    })
+);
+
+io.on('connection', socket => {
+    console.log('hello! ', socket.decoded_token);
+
+    sockets[socket.decoded_token._id] = socket;
+
+    socket.on('message', data => {
+        if (sockets[data.userId]) {
+            sockets[data.userId].emit('message', data.message);
+        }
+        new Message({
+            conversation: 'TO_THINK_ABOUT',
+            author: socket.decoded_token._id,
+            body: data.message
+        });
+
+    });
+
+    socket.on('disconnect', reason => {
+        console.log('disc', reason);
+        delete sockets[socket.decoded_token._id];
+    });
 });
